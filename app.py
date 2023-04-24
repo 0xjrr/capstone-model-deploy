@@ -136,7 +136,7 @@ def update():
                 {
                     "observation_id": p.observation_id,
                     "outcome": p.true_class,
-                    "predicted_outcome": p.prediction
+                    "predicted_outcome": bool(p.prediction)
                 }
             )
     except Prediction.DoesNotExist:
