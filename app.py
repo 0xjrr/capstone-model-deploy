@@ -140,7 +140,7 @@ def update():
                 }
             )
     except Prediction.DoesNotExist:
-        error_msg = 'Observation ID: "{}" does not exist'.format(obs['id'])
+        error_msg = 'Observation ID: "{}" does not exist'.format(obs['observation_id'])
         return jsonify({'error': error_msg})
     except:
         error_msg = 'error malformed request'
