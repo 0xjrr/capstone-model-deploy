@@ -142,6 +142,9 @@ def update():
     except Prediction.DoesNotExist:
         error_msg = 'Observation ID: "{}" does not exist'.format(obs['id'])
         return jsonify({'error': error_msg})
+    except:
+        error_msg = 'error malformed request'
+        return jsonify({'error': error_msg})
 
 
 @app.route('/list-db-contents')
