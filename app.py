@@ -87,7 +87,7 @@ def verify_data_types(data):
 app = Flask(__name__)
 
 
-@app.route('/should_search', methods=['POST'])
+@app.route('/should_search/', methods=['POST'])
 def predict():
     # Flask provides a deserialization convenience function called
     # get_json that will work if the mimetype is application/json.
@@ -125,7 +125,7 @@ def predict():
     return jsonify(response)
 
 
-@app.route('/search_result', methods=['POST'])
+@app.route('/search_result/', methods=['POST'])
 def update():
     obs = request.get_json()
     try:
@@ -147,7 +147,7 @@ def update():
         return jsonify({'error': error_msg})
 
 
-@app.route('/list-db-contents')
+@app.route('/list-db-contents/')
 def list_db_contents():
     return jsonify([
         model_to_dict(obs) for obs in Prediction.select()
