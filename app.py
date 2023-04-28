@@ -70,11 +70,20 @@ def verify_data_types(data):
         "Object of search": [str],
         "station": [str]
     }
+    selected_columns = [
+        'Type',
+        'Gender',
+        'Age range',
+        'Officer-defined ethnicity',
+        'Object of search',
+        'station'
+        ]
+    
     for col, expected_type in expected_types.items():
-        if col not in data:
+        if col not in data and col in selected_columns:
             return (True, {'error': f"{col} column not found"})
         actual_type = type(data[col])
-        if actual_type not in expected_type:
+        if actual_type not in expected_type and col in selected_columns:
             return (True, {'error': f"{col} column has wrong data type. Expected {expected_type}, got {actual_type}"})
     return (False, "All data types are correct")
 
@@ -102,7 +111,14 @@ def predict():
     observation = obs_dict
     # Now do what we already learned in the notebooks about how to transform
     # a single observation into a dataframe that will work with a pipeline.
-    obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
+    try:
+        obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
+    except Exception as e:
+        response = {'error': f'error malformed request {e.message}'}
+        return jsonify(response)
+    except:
+        response = {'error': f'error malformed request'}
+        return jsonify(response)
     # Now get ourselves an actual prediction of the positive class.
     proba = pipeline.predict_proba(obs)[0, 1]
     prediction = pipeline.predict(obs)
