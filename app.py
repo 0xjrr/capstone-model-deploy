@@ -76,7 +76,7 @@ def verify_data_types(data):
         'Age range',
         'Officer-defined ethnicity',
         'Object of search',
-        'station'
+        'station',
         ]
     
     for col, expected_type in expected_types.items():
