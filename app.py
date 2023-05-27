@@ -79,6 +79,10 @@ def verify_data_types(data):
         'station',
         ]
     
+    for key in data.keys():
+        if key not in expected_types.keys():
+            return True, {'error': f"Unexpected key: {key}"}
+
     for col, expected_type in expected_types.items():
         if col not in data and col in selected_columns:
             return (True, {'error': f"{col} column not found"})
