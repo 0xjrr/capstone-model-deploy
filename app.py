@@ -84,7 +84,7 @@ def verify_data_types(data):
             return True, {'error': f"Unexpected key: {key}"}
 
     for col, expected_type in expected_types.items():
-        if col not in data and col in selected_columns:
+        if col not in data:
             return (True, {'error': f"{col} column not found"})
         actual_type = type(data[col])
         if actual_type not in expected_type and col in selected_columns:
