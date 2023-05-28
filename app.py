@@ -79,8 +79,12 @@ def verify_data_types(data):
         'station',
         ]
     
+    for key in data.keys():
+        if key not in expected_types.keys():
+            return True, {'error': f"Unexpected key: {key}"}
+
     for col, expected_type in expected_types.items():
-        if col not in data and col in selected_columns:
+        if col not in data:
             return (True, {'error': f"{col} column not found"})
         actual_type = type(data[col])
         if actual_type not in expected_type and col in selected_columns:
@@ -91,37 +95,39 @@ def verify_data_types(data):
 ########################################
 
 ########################################
-# Begin webserver stuff
+# Begin webserver 
 
 app = Flask(__name__)
 
 
 @app.route('/should_search/', methods=['POST'])
 def predict():
-    # Flask provides a deserialization convenience function called
-    # get_json that will work if the mimetype is application/json.
-    obs_dict = request.get_json()
+
+    try:
+        obs_dict = request.get_json()
+    except:
+        response = {'error': 'Could not parse the request'}
+        return jsonify(response), 405
 
     is_error, error_msg = verify_data_types(obs_dict)
     if is_error:
         response = {'error': error_msg}
-        return jsonify(response)
+        return jsonify(response), 405
     
     _id = obs_dict['observation_id']
     observation = obs_dict
-    # Now do what we already learned in the notebooks about how to transform
-    # a single observation into a dataframe that will work with a pipeline.
+
     try:
         obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
     except Exception as e:
         response = {'error': f'error malformed request {e.message}'}
-        return jsonify(response)
+        return jsonify(response), 405
     except:
         response = {'error': f'error malformed request'}
-        return jsonify(response)
+        return jsonify(response), 405
     # Now get ourselves an actual prediction of the positive class.
     proba = pipeline.predict_proba(obs)[0, 1]
-    prediction = pipeline.predict(obs)
+    prediction = int(proba >= 0.3)  # apply the threshold 
     response = {'outcome': bool(prediction)}
     
     p = Prediction(
@@ -138,6 +144,7 @@ def predict():
         response['error'] = error_msg
         print(error_msg)
         DB.rollback()
+        return jsonify(response), 405
     return jsonify(response)
 
 
@@ -157,17 +164,10 @@ def update():
             )
     except Prediction.DoesNotExist:
         error_msg = 'Observation ID: "{}" does not exist'.format(obs['observation_id'])
-        return jsonify({'error': error_msg})
+        return jsonify({'error': error_msg}), 405
     except:
         error_msg = 'error malformed request'
-        return jsonify({'error': error_msg})
-
-
-@app.route('/list-db-contents/')
-def list_db_contents():
-    return jsonify([
-        model_to_dict(obs) for obs in Prediction.select()
-    ])
+        return jsonify({'error': error_msg}), 405
 
 
 # End webserver stuff
