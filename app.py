@@ -95,15 +95,14 @@ def verify_data_types(data):
 ########################################
 
 ########################################
-# Begin webserver stuff
+# Begin webserver 
 
 app = Flask(__name__)
 
 
 @app.route('/should_search/', methods=['POST'])
 def predict():
-    # Flask provides a deserialization convenience function called
-    # get_json that will work if the mimetype is application/json.
+
     try:
         obs_dict = request.get_json()
     except:
@@ -117,8 +116,7 @@ def predict():
     
     _id = obs_dict['observation_id']
     observation = obs_dict
-    # Now do what we already learned in the notebooks about how to transform
-    # a single observation into a dataframe that will work with a pipeline.
+
     try:
         obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
     except Exception as e:
@@ -129,7 +127,7 @@ def predict():
         return jsonify(response), 405
     # Now get ourselves an actual prediction of the positive class.
     proba = pipeline.predict_proba(obs)[0, 1]
-    prediction = pipeline.predict(obs)
+    prediction = int(proba >= 0.3)  # apply the threshold 
     response = {'outcome': bool(prediction)}
     
     p = Prediction(
